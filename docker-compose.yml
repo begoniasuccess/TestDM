@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  fastapi_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: testContainer
+    depends_on:
+      - postgres
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:Pswd@postgres/main
+    volumes:
+      - ./app:/code/app
+
+  postgres:
+    image: postgres:latest
+    container_name: fastapi_postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=Pswd
+      - POSTGRES_DB=main
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db_volumes/postgresql:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "80:80"
+    depends_on:
+      - postgres
+    volumes:
+      - ./db_volumes/pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data:
